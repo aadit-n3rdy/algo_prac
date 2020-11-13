@@ -6,6 +6,12 @@
 #define ASCII_Z_LOWER_CASE 122
 #define ASCII_Z_UPPER_CASE 90
 
+#define TEST_CASE_COUNT 4
+
+struct TestData {
+  const char* input;
+  int output;
+};
 
 /* 
   Converts char to lower case if upper case
@@ -18,7 +24,7 @@ char toLowerCase(char chr) {
   return chr;
 }
 
-int checkStrUnique(char* str) {
+int checkStrUnique(const char* str) {
   if(str==NULL) {
     return -2;
   }
@@ -51,11 +57,34 @@ int checkStrUnique(char* str) {
   return i==length;
 }
 
+void test() {
+  struct TestData testdata[TEST_CASE_COUNT];
+  testdata[0].input = "abcde";
+  testdata[0].output = 1;
+  testdata[1].input = "abcda";
+  testdata[1].output = 0;
+  testdata[2].input = NULL;
+  testdata[2].output = -2;
+  testdata[3].input = "123abc";
+  testdata[3].output = -1;
+
+  for(int i = 0; i < TEST_CASE_COUNT; i++) {
+    if(testdata[i].output != checkStrUnique(testdata[i].input)) {
+      printf("Test %d FAILED\n", i);
+    }
+    else {
+      printf("Test %d SUCCESS\n", i);
+    }
+  }
+  return;
+}
+
 /* Assumptions:
   -> Input <= 99 chars
   -> Only lower case alphabets
 */
 int main() {
+  /*
   char inp[100];
   scanf("%100s", inp);
   int isUnique = checkStrUnique(0);
@@ -71,4 +100,8 @@ int main() {
   else {
     printf("String does not have unique chars");
   }
+  */
+  test();
 }
+
+
