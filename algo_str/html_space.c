@@ -2,26 +2,46 @@
 #include<stdlib.h>
 #include<string.h>
 
+
+/*
+ Struct for building strings, like a stringstream
+*/
 struct StringBuilder {
   char* data;
   int curBlocks;
 };
 
+
+/*
+ Allocates 8 bytes of memory and initialised the
+ StringBuilder
+*/
 int sbinit(struct StringBuilder* builder) {
   builder->data = (char*)calloc(8, sizeof(char));
   builder->curBlocks=1;
 }
 
+/*
+ Returns the current capacity of the StringBuilder
+ assuming no more reallocs
+*/
 int sbcapacity(struct StringBuilder* builder){
   return builder->curBlocks*8;
 }
 
+/*
+ Returns the length of the string in the StringBuilder
+ excluding the trailing null
+*/
 int sbsize(struct StringBuilder* builder) {
   int size=0;
   for(size=0; builder->data[size]!='\0'; size++){}
-  return size+1;
+  return size;
 }
 
+/*
+ Allocates 8 more bytes for the StringBuilder
+*/
 int sbexpand(struct StringBuilder* builder) {
    builder->curBlocks++;
    builder->data=realloc(builder->data, builder->curBlocks*sizeof(char)*8);
@@ -31,47 +51,65 @@ int sbexpand(struct StringBuilder* builder) {
 }
 
 int sbappendchar(struct StringBuilder* builder, char chr) {
-  if(sbsize(builder)%8 == 1) {
+  if(sbsize(builder)%8 <= 1) {
     sbexpand(builder);
   }
-  builder->data[sbsize(builder)-1] = chr;
+  builder->data[sbsize(builder)] = chr;
 }
 
-int sbappendstring(struct StringBuilder* builder, const char* str) {
-  int startSize = sbsize(builder)-1;
+int sbappendstring(struct StringBuilder* builder, char* str) {
+  int startSize = sbsize(builder);
   int i = 0;
-  for(int i = 0; i < strlen(str); i++) {
+  int len = strlen(str);
+  for(int i = 0; i < len; i++) {
     if(i == sbcapacity(builder)-1) {
       sbexpand(builder);
     }
     builder->data[i+startSize] = str[i];
-  }
-  
+  }  
 }
 
+
+/*
+ Copies the text in the builder into the string
+ WARNING: MEMORY MUST BE ALLOCATED FOR str
+ DOES NOT ALLOCATE MEMORY
+*/
 void sbget(struct StringBuilder* builder, char* str) {  
   int size = sbsize(builder);
-  for(int i = 0; i < size-1; i++) {
+  for(int i = 0; i < size; i++) {
     str[i] = builder->data[i];
-  }	
+  }
 }
 
-int main() {
-  char input[20];
-  scanf("%[^\n]", input);
+/*
+ Replaces all the spaces in a string with 
+ '%20' to make the string safe for HTML
+*/
+char* htmlSpace(char* str) {
   struct StringBuilder builder;
   sbinit(&builder);
-  int length = strlen(input);
-  for(int i = 0; i < strlen(input); i++) {
-    if(input[i] == ' ') {
+  int length = strlen(str);
+  for(int i = 0; i < strlen(str); i++) {
+    // Appends %20 if the char is a space,
+    // else appends the char itself
+    if(str[i] == ' ') {
       sbappendstring(&builder, "%20");
     }
     else {
-      sbappendchar(&builder, input[i]);
+      sbappendchar(&builder, str[i]);
     }
   }
-  char* output=calloc(sbsize(&builder)+1, sizeof(char));
+  char* output = calloc(sbsize(&builder), sizeof(char));
   sbget(&builder, output);
+  return output;
+}
+
+int main() {
+  char* input = calloc(20, sizeof(char));
+  char* output;
+  scanf("%[^\n]", input);
+  output = htmlSpace(input);
   printf("The properly spaced string is:\n%s\n", output);
   return 0;
 }
