@@ -40,52 +40,38 @@ int sbappendchar(struct StringBuilder* builder, char chr) {
 int sbappendstring(struct StringBuilder* builder, const char* str) {
   int startSize = sbsize(builder)-1;
   int i = 0;
-  while(str[i] != '\0') {
-    if(i==sbcapacity(builder)-1) {
+  for(int i = 0; i < strlen(str); i++) {
+    if(i == sbcapacity(builder)-1) {
       sbexpand(builder);
     }
     builder->data[i+startSize] = str[i];
   }
+  
 }
 
-void sbget(struct StringBuilder* builder, char** pString) {  
+void sbget(struct StringBuilder* builder, char* str) {  
   int size = sbsize(builder);
-  *pString = (char*)calloc(size, sizeof(char));
   for(int i = 0; i < size-1; i++) {
-    *pString[i] = builder->data[i];
+    str[i] = builder->data[i];
   }	
-}
-
-int cust_strlen(char* str) {
-  int size=0;
-  for(size=0; str != '\0'; str++, size++){
-    printf("Calcing length");
-  }
-  return size;
 }
 
 int main() {
   char input[20];
-  printf("Getting input: \n");
-  scanf("%s"
-  printf("Input done\n");
+  scanf("%[^\n]", input);
   struct StringBuilder builder;
   sbinit(&builder);
-  int length = cust_strlen(input);
-  printf("%d\n", length);
-  for(int i = 0; i < length;  input++, i++) {
-    printf("In the loop\n");
-    if(input == ' ') {
-      printf("Pusing space at index %d\n", i);
-      sbappendstring(&builder, "%20\0");
+  int length = strlen(input);
+  for(int i = 0; i < strlen(input); i++) {
+    if(input[i] == ' ') {
+      sbappendstring(&builder, "%20");
     }
     else {
-      sbappendchar(&builder, *input);
+      sbappendchar(&builder, input[i]);
     }
   }
-  printf("Loop done\n");
-  char* output;
-  sbget(&builder, &output);
-  printf("The properly spaced string is:\n%s", output);
+  char* output=calloc(sbsize(&builder)+1, sizeof(char));
+  sbget(&builder, output);
+  printf("The properly spaced string is:\n%s\n", output);
   return 0;
 }
